@@ -1,0 +1,24 @@
+{
+  "name": "klassly",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {},
+  "prettier": {
+    "singleQuote": true
+  },
+  "type": "module",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.1.2",
+    "date-fns": "^2.29.3",
+    "dotenv": "^16.0.3",
+    "global-agent": "^3.0.0",
+    "got": "^12.5.1",
+    "playwright": "^1.27.0",
+    "toml": "^3.0.0",
+    "tough-cookie": "^4.1.2"
+  }
+}
