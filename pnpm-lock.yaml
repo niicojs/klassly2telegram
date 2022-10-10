@@ -7,6 +7,7 @@ specifiers:
   formdata-node: ^5.0.0
   global-agent: ^3.0.0
   got: ^12.5.1
+  minimist: ^1.2.6
   playwright: ^1.27.0
   toml: ^3.0.0
   tough-cookie: ^4.1.2
@@ -18,6 +19,7 @@ dependencies:
   formdata-node: 5.0.0
   global-agent: 3.0.0
   got: 12.5.1
+  minimist: 1.2.6
   playwright: 1.27.0
   toml: 3.0.0
   tough-cookie: 4.1.2
@@ -299,6 +301,10 @@ packages:
   /mimic-response/4.0.0:
     resolution: {integrity: sha512-e5ISH9xMYU0DzrT+jl8q2ze9D6eWBto+I8CNpe+VI+K2J/F/k3PdkdTdz4wvGVH4NTpo+NRYTVIuMQEMMcsLqg==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+    dev: false
+
+  /minimist/1.2.6:
+    resolution: {integrity: sha512-Jsjnk4bw3YJqYzbdyBiNsPWHPfO++UGG749Cxs6peCu5Xg4nrena6OVxOYxrQTqww0Jmwt+Ref8rggumkTLz9Q==}
     dev: false
 
   /node-domexception/1.0.0:

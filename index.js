@@ -3,19 +3,30 @@ import fs from 'fs';
 import toml from 'toml';
 import { chromium } from 'playwright';
 import Telegram from './telegram.js';
+import parseArgs from 'minimist';
+import path from 'path';
+
+const argv = parseArgs(process.argv.slice(2));
+const home = argv.home || '.';
+const configFile = path.join(home, 'config.toml');
+const historyFile = path.join(home, 'history.json');
 
 console.log('Load config & history...');
+if (!fs.existsSync(configFile)) {
+  console.error('No config file!');
+  process.exit(404);
+}
 
-const config = toml.parse(fs.readFileSync('config.toml', 'utf-8'));
+const config = toml.parse(fs.readFileSync(configFile, 'utf-8'));
 if (config.proxy?.url) {
   global.GLOBAL_AGENT.HTTP_PROXY = config.proxy.url;
   process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
 }
 
 const history = [];
-if (fs.existsSync('history.json')) {
+if (fs.existsSync(historyFile)) {
   history.push(
-    ...JSON.parse(fs.readFileSync('history.json', 'utf8')).map((h) => ({
+    ...JSON.parse(fs.readFileSync(historyFile, 'utf8')).map((h) => ({
       ...h,
       date: new Date(h.date),
     }))
@@ -114,7 +125,11 @@ for (const name of config.classes.names) {
   allposts.push(...posts.map((p) => ({ klass: name, ...p })));
 }
 
-fs.writeFileSync('posts.json', JSON.stringify(allposts, null, 2), 'utf8');
+fs.writeFileSync(
+  path.join(home, 'posts.json'),
+  JSON.stringify(allposts, null, 2),
+  'utf8'
+);
 
 for (const post of allposts) {
   try {
@@ -130,6 +145,6 @@ await context.close();
 await browser.close();
 
 console.log('Save history...');
-fs.writeFileSync('history.json', JSON.stringify(history, null, 2), 'utf8');
+fs.writeFileSync(historyFile, JSON.stringify(history, null, 2), 'utf8');
 
-console.log('Done');
+console.log('Done.');
