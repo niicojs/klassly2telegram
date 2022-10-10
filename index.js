@@ -1,7 +1,7 @@
 import 'global-agent/bootstrap.js';
 import fs from 'fs';
 import toml from 'toml';
-import { chromium } from 'playwright';
+import { chromium } from 'playwright-chromium';
 import Telegram from './telegram.js';
 import parseArgs from 'minimist';
 import path from 'path';
@@ -34,7 +34,6 @@ if (fs.existsSync(historyFile)) {
 }
 
 const browser = await chromium.launch({
-  channel: 'chrome-beta',
   proxy: config.proxy?.url ? { server: config.proxy.url } : undefined,
   // headless: false,
 });

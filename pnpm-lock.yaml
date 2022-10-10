@@ -8,7 +8,7 @@ specifiers:
   global-agent: ^3.0.0
   got: ^12.5.1
   minimist: ^1.2.6
-  playwright: ^1.27.0
+  playwright-chromium: ^1.27.0
   toml: ^3.0.0
   tough-cookie: ^4.1.2
 
@@ -20,7 +20,7 @@ dependencies:
   global-agent: 3.0.0
   got: 12.5.1
   minimist: 1.2.6
-  playwright: 1.27.0
+  playwright-chromium: 1.27.0
   toml: 3.0.0
   tough-cookie: 4.1.2
 
@@ -327,19 +327,19 @@ packages:
     engines: {node: '>=12.20'}
     dev: false
 
-  /playwright-core/1.27.0:
-    resolution: {integrity: sha512-VBKaaFUVKDo3akW+o4DwbK1ZyXh46tcSwQKPK3lruh8IJd5feu55XVZx4vOkbb2uqrNdIF51sgsadYT533SdpA==}
-    engines: {node: '>=14'}
-    hasBin: true
-    dev: false
-
-  /playwright/1.27.0:
-    resolution: {integrity: sha512-F+0+0RD03LS+KdNAMMp63OBzu+NwYYLd52pKLczuSlTsV5b/SLkUoNhSfzDFngEFOuRL2gk0LlfGW3mKiUBk6w==}
+  /playwright-chromium/1.27.0:
+    resolution: {integrity: sha512-nd33WzI8U6cBVnNVBiv83K8SuaxFtm4EICDtd3Wd0pXMgsnmfzKIXBwmg1IOyBr4vtpH+Ho82iB/ME4doxW3hg==}
     engines: {node: '>=14'}
     hasBin: true
     requiresBuild: true
     dependencies:
       playwright-core: 1.27.0
+    dev: false
+
+  /playwright-core/1.27.0:
+    resolution: {integrity: sha512-VBKaaFUVKDo3akW+o4DwbK1ZyXh46tcSwQKPK3lruh8IJd5feu55XVZx4vOkbb2uqrNdIF51sgsadYT533SdpA==}
+    engines: {node: '>=14'}
+    hasBin: true
     dev: false
 
   /proxy-from-env/1.1.0:
