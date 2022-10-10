@@ -1,9 +1,7 @@
+import { FormData } from 'formdata-node';
 import got from 'got';
 import { CookieJar } from 'tough-cookie';
-import { setDefaultOptions, formatDistanceToNow } from 'date-fns';
-import { fr } from 'date-fns/locale/index.js';
-
-setDefaultOptions({ locale: fr });
+import { format } from 'date-fns';
 
 export default function Telegram(config) {
   const token = config.telegram.token;
@@ -12,7 +10,7 @@ export default function Telegram(config) {
 
   let last = new Date().getTime() - throttling;
   const throttle = async () => {
-    if (throttling > 0 && new Date().getTime() - throttling < last) {
+    if (throttling > 0 && new Date().getTime() < last + throttling) {
       await new Promise((resolve) => setTimeout(resolve, throttling));
     }
     last = new Date().getTime();
@@ -22,6 +20,7 @@ export default function Telegram(config) {
     prefixUrl: `https://api.telegram.org/bot${token}`,
     resolveBodyOnly: true,
     responseType: 'json',
+    retry: { limit: 0 },
   });
 
   const escape = (text) =>
@@ -83,7 +82,8 @@ export default function Telegram(config) {
         parse_mode: 'MarkdownV2',
         text: `
 *__${escape(post.klass)}__*
-De ${escape(post.from)} ${formatDistanceToNow(post.date, { addSuffix: true })}
+De ${escape(post.from)}
+${format(post.date, `'Le' dd/MM/yy 'à' hh:mm:ss`)}
   
 _${escape(post.text)}_`,
       },

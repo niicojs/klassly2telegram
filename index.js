@@ -30,7 +30,7 @@ const browser = await chromium.launch({
 const context = await browser.newContext({
   ignoreHTTPSErrors: true,
 });
-// await context.route('**/*.{png,jpg,jpeg}', (route) => route.abort());
+await context.route('**/*.{png,jpg,jpeg}', (route) => route.abort());
 
 const page = await context.newPage();
 
@@ -41,7 +41,9 @@ const login = async () => {
     await page.goto('https://fr.klass.ly/');
     await page.locator('.phone-input').fill(config.login.user);
     await page.locator('.form-input-text2__input').fill(config.login.password);
+    await page.locator('.kr-login-form__btn').waitFor('visible');
     await page.locator('.kr-login-form__btn').click();
+    await page.waitForURL('https://fr.klass.ly/#class');
     console.log('  Ok');
   } catch (e) {
     console.error(e);
@@ -56,23 +58,30 @@ const getInfoFromClass = async (title) => {
   await page.locator('.class-list-items').waitFor();
   await page.locator(`[title="${title}"]`).click();
 
-  await page.locator('#timeline_posts-react').waitFor();
+  await page.waitForURL('**/#class/inside/*');
 
-  const nbposts = await page.locator('#timeline_posts-react .k-post').count();
-  console.log(`  ${nbposts} posts`);
+  await page.locator('.timeline_posts-react').waitFor('visible');
 
   const data = await page
     .locator('_react=TimelinePostWrapperComponent')
     .evaluateAll((nodes) =>
       nodes.map((node) => {
-        const keys = Object.keys(node);
-        const instanceKey = keys.filter((prop) =>
-          /__reactInternalInstance/.test(prop)
-        )[0];
-        const post = node[instanceKey].return.stateNode.props.post;
-        return post;
+        console.log(node);
+        try {
+          const keys = Object.keys(node);
+          const instanceKey = keys.filter((prop) =>
+            /__reactInternalInstance/.test(prop)
+          )[0];
+          const post = node[instanceKey].return.stateNode.props.post;
+          return post;
+        } catch (e) {
+          return { error: e };
+        }
       })
     );
+
+  console.log(`  ${data.length} posts`);
+
   const posts = await Promise.all(
     data.reverse().map(async (post) => ({
       id: post.id,

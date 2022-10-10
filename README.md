@@ -1,0 +1,2 @@
+- install git and nodejs (tested on v16 and v18)
+- `git clone https://github.com/niicojs/klassly2telegram` 
