@@ -11,7 +11,7 @@ const home = argv.home || '.';
 const configFile = path.join(home, 'config.toml');
 const historyFile = path.join(home, 'history.json');
 
-console.log('Load config & history...');
+console.log(`Load config & history from '${home}'...`);
 if (!fs.existsSync(configFile)) {
   console.error('No config file!');
   process.exit(404);
