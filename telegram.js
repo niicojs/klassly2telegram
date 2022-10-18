@@ -1,6 +1,6 @@
+import { Blob } from 'buffer';
 import { FormData } from 'formdata-node';
 import got from 'got';
-import { CookieJar } from 'tough-cookie';
 import { format } from 'date-fns';
 
 export default function Telegram(config) {
@@ -24,18 +24,7 @@ export default function Telegram(config) {
   });
 
   const escape = (text) =>
-    text.replace(
-      /(\_|\*|\[|\]|\(|\)|\~|\`|\>|\#|\+|\-|\=|\||\{|\}|\.|\!)/g,
-      '\\$1'
-    );
-
-  const downloadFile = async (file) => {
-    const cookieJar = new CookieJar();
-    for (const c of file.cookies) {
-      await cookieJar.setCookie(`${c.name}=${c.value}`, file.url);
-    }
-    return got.get(file.url, { cookieJar }).buffer();
-  };
+    text.replace(/(\_|\*|\[|\]|\(|\)|\~|\`|\>|\#|\+|\-|\=|\||\{|\}|\.|\!)/g, '\\$1');
 
   const sendAttachments = async (files, type) => {
     if (files.length === 1) {
@@ -46,23 +35,21 @@ export default function Telegram(config) {
         audio: 'sendAudio',
       };
       const file = files[0];
-      const raw = await downloadFile(file);
       const form = new FormData();
       form.append('chat_id', chatId);
       form.append('disable_notification', true);
-      form.append(type, new Blob([raw]), file.name);
+      form.append(type, new Blob([file.data]), file.name);
       await client.post(api[type], { body: form });
     } else {
       const form = new FormData();
       form.append('chat_id', chatId);
       const media = [];
       for (const file of files) {
-        const raw = await downloadFile(file);
         media.push({
           type: type,
           media: `attach://${file.name}`,
         });
-        form.append(file.name, new Blob([raw]), file.name);
+        form.append(file.name, new Blob([file.data]), file.name);
       }
       form.append('media', JSON.stringify(media));
       await client.post('sendMediaGroup', { body: form });
@@ -81,7 +68,7 @@ export default function Telegram(config) {
         chat_id: chatId,
         parse_mode: 'MarkdownV2',
         text: `
-*__${escape(post.klass)}__*
+*__${escape(post.klass.name)}__*
 De ${escape(post.from)}
 ${format(post.date, `'Le' dd/MM/yy 'à' hh:mm:ss`)}
   
@@ -104,18 +91,16 @@ _${escape(post.text)}_`,
     }
 
     // notif pour les autres objets (video ? audio ?)
-    const others = post.attachments.filter(
-      (a) => !['image', 'document'].includes(a.type)
-    );
+    const others = post.attachments.filter((a) => !['image', 'document'].includes(a.type));
     if (others.length > 0) {
       await throttle();
       await client.post('sendMessage', {
         json: {
           chat_id: config.telegram.chatId,
           parse_mode: 'MarkdownV2',
-          text: `${others.length} objet${
-            others.length > 1 ? 's' : ''
-          } de type ${others.map((o) => o.type).join(',')}`,
+          text: `${others.length} objet${others.length > 1 ? 's' : ''} de type ${others
+            .map((o) => o.type)
+            .join(',')}`,
         },
       });
     }

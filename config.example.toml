@@ -2,12 +2,6 @@
 user =  "klassly username"
 password = "klassly password"
 
-[classes]
-names = [
-  "titles of classes",
-]
-
 [telegram]
 token="token to get from @fatherbot"
 chatId=1111 # id of user or group
-throttling=1000 
