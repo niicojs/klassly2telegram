@@ -12,7 +12,7 @@ export default function Klassly(config) {
   });
 
   let token = null;
-  let device = 'web-134e32e568cb0';
+  let device = '';
   let imgtoken = null;
 
   const setCommon = (form) => {
