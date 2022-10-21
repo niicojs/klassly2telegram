@@ -121,6 +121,13 @@ export default function Klassly(config) {
         if (url.startsWith('https://data.klassroom.co')) {
           url = 'https://www.klass.ly/_data' + url.substring('https://data.klassroom.co'.length);
         }
+        if (attach.type === 'video') {
+          url =
+            'https://klass.ly/class/download?url=' +
+            Buffer.from(url).toString('base64') +
+            '&name=' +
+            Buffer.from(attach.name).toString('base64');
+        }
         attach.data = await client.get(url).buffer();
       }
     }

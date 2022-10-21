@@ -2,6 +2,7 @@ import { Blob } from 'buffer';
 import { FormData } from 'formdata-node';
 import got from 'got';
 import { format } from 'date-fns';
+import fs from 'fs/promises';
 
 export default function Telegram(config) {
   const token = config.telegram.token;
@@ -90,8 +91,15 @@ _${escape(post.text)}_`,
       await sendAttachments(docs, 'document');
     }
 
-    // notif pour les autres objets (video ? audio ?)
-    const others = post.attachments.filter((a) => !['image', 'document'].includes(a.type));
+    // send videos
+    const videos = post.attachments.filter((a) => a.type === 'video');
+    if (videos.length > 0) {
+      await throttle();
+      await sendAttachments(videos, 'video');
+    }
+
+    // notif pour les autres objets (audio ?)
+    const others = post.attachments.filter((a) => !['image', 'document', 'video'].includes(a.type));
     if (others.length > 0) {
       await throttle();
       await client.post('sendMessage', {
