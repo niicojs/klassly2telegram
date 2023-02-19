@@ -25,6 +25,7 @@ try {
     process.exit(404);
   }
 } catch {}
+fs.writeFileSync(lockFile, 'lock', 'utf-8');
 
 try {
   const history = [];
