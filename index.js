@@ -72,5 +72,7 @@ try {
 
   console.log('Done.');
 } finally {
-  fs.rmSync(lockFile);
+  try {
+    fs.rmSync(lockFile);
+  } catch {}
 }
