@@ -17,8 +17,8 @@
     "dotenv": "^16.0.3",
     "formdata-node": "^5.0.0",
     "global-agent": "^3.0.0",
-    "got": "^12.5.1",
-    "minimist": "^1.2.6",
+    "got": "^12.5.3",
+    "minimist": "^1.2.8",
     "toml": "^3.0.0",
     "tough-cookie": "^4.1.2"
   }
