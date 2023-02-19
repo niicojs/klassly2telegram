@@ -15,16 +15,16 @@ const lockFile = path.join(home, '.lock');
 console.log('Load config & history...');
 const config = getConfig(home);
 
-const old = addHours(new Date(), -3);
-const stats = fs.statSync(lockFile);
-if (stats.isFile()) {
+try {
+  const old = addHours(new Date(), -3);
+  const stats = fs.statSync(lockFile);
   if (isBefore(stats.birthtime, old)) {
     fs.rmSync(lockFile);
   } else {
     console.error('Lock file there, aborting!');
     process.exit(404);
   }
-}
+} catch {}
 
 try {
   const history = [];
