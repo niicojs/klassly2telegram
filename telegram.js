@@ -39,6 +39,7 @@ export default function Telegram(config) {
 
   const sendAttachments = async (files, type) => {
     if (files.length === 1) {
+      await throttle();
       const api = {
         photo: 'sendPhoto',
         document: 'sendDocument',
@@ -53,6 +54,7 @@ export default function Telegram(config) {
       await client.post(api[type], { body: form });
     } else {
       for (const elts of chunk(files, 10)) {
+        await throttle();
         const form = new FormData();
         form.append('chat_id', chatId);
         const media = [];
@@ -92,21 +94,18 @@ _${escape(post.text)}_`,
     // send photos
     const images = post.attachments.filter((a) => a.type === 'image');
     if (images.length > 0) {
-      await throttle();
       await sendAttachments(images, 'photo');
     }
 
     // document (pdf par exemple)
     const docs = post.attachments.filter((a) => a.type === 'document');
     if (docs.length > 0) {
-      await throttle();
       await sendAttachments(docs, 'document');
     }
 
     // send videos
     const videos = post.attachments.filter((a) => a.type === 'video');
     if (videos.length > 0) {
-      await throttle();
       await sendAttachments(videos, 'video');
     }
 
