@@ -74,7 +74,7 @@ try {
   if (synchistory.length > 200) {
     synchistory = synchistory.slice(synchistory.length - 200);
   }
-  fs.writeFileSync(synchistory, JSON.stringify(history, null, 2), 'utf8');
+  fs.writeFileSync(historyFile, JSON.stringify(synchistory, null, 2), 'utf8');
 
   console.log('Done.');
 } finally {
