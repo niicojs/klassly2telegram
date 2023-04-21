@@ -63,13 +63,18 @@ try {
       await telegram.sendMessage(post);
       history.push({ id: post.id, date: post.date });
     } catch (e) {
-      console.error(e.response?.body?.description || e.message);
-      console.error(e);
+      console.log('Error')
+      console.log(e.response?.body?.description || e.message);
+      console.log(e);
     }
   }
 
   console.log('Save history...');
-  fs.writeFileSync(historyFile, JSON.stringify(history, null, 2), 'utf8');
+  let synchistory = history;
+  if (synchistory.length > 200) {
+    synchistory = synchistory.slice(synchistory.length - 200);
+  }
+  fs.writeFileSync(synchistory, JSON.stringify(history, null, 2), 'utf8');
 
   console.log('Done.');
 } finally {
