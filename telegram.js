@@ -2,7 +2,17 @@ import { Blob } from 'buffer';
 import { FormData } from 'formdata-node';
 import got from 'got';
 import { format } from 'date-fns';
-import fs from 'fs/promises';
+
+function chunk(items, size) {
+  const chunks = [];
+  items = [].concat(...items);
+
+  while (items.length) {
+    chunks.push(items.splice(0, size));
+  }
+
+  return chunks;
+}
 
 export default function Telegram(config) {
   const token = config.telegram.token;
@@ -42,18 +52,20 @@ export default function Telegram(config) {
       form.append(type, new Blob([file.data]), file.name);
       await client.post(api[type], { body: form });
     } else {
-      const form = new FormData();
-      form.append('chat_id', chatId);
-      const media = [];
-      for (const file of files) {
-        media.push({
-          type: type,
-          media: `attach://${file.name}`,
-        });
-        form.append(file.name, new Blob([file.data]), file.name);
+      for (const elts of chunk(files, 10)) {
+        const form = new FormData();
+        form.append('chat_id', chatId);
+        const media = [];
+        for (const file of elts) {
+          media.push({
+            type: type,
+            media: `attach://${file.name}`,
+          });
+          form.append(file.name, new Blob([file.data]), file.name);
+        }
+        form.append('media', JSON.stringify(media));
+        await client.post('sendMediaGroup', { body: form });
       }
-      form.append('media', JSON.stringify(media));
-      await client.post('sendMediaGroup', { body: form });
     }
   };
 
