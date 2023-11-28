@@ -43,10 +43,12 @@ try {
 
   // let's go
 
+  console.log('Login...');
   const info = await klassly.login();
 
   const allposts = [];
   for (const klass of info.klasses) {
+    console.log(`Get posts from '${klass.name}'...`);
     let posts = await klassly.getPost(klass);
     console.log(`  --> ${posts.length} posts`);
 
@@ -56,14 +58,16 @@ try {
     allposts.push(...posts.map((p) => ({ klass, ...p })));
   }
 
+  console.log('Download attachments...');
   await klassly.downloadAttachments(allposts);
 
+  console.log('Send to telegram...');
   for (const post of allposts) {
     try {
       await telegram.sendMessage(post);
       history.push({ id: post.id, date: post.date });
     } catch (e) {
-      console.log('Error')
+      console.log('Error');
       console.log(e.response?.body?.description || e.message);
       console.log(e);
     }

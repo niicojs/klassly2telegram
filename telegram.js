@@ -72,7 +72,7 @@ export default function Telegram(config) {
   };
 
   const sendMessage = async (post) => {
-    if (post.type !== 'message') {
+    if (!['message', 'poll'].includes(post.type)) {
       post.text = `Nouveau message de type '${post.type}`;
     }
 
@@ -90,6 +90,19 @@ ${format(post.date, `'Le' dd/MM/yy 'à' hh:mm:ss`)}
 _${escape(post.text)}_`,
       },
     });
+
+    if (post.type === 'poll') {
+      await client.post('sendMessage', {
+        json: {
+          chat_id: chatId,
+          parse_mode: 'MarkdownV2',
+          text: `
+*__\\(sondage disponible sur l'appli\\)__*
+    
+_${escape(post.poll.question)}_`,
+        },
+      });
+    }
 
     // send photos
     const images = post.attachments.filter((a) => a.type === 'image');

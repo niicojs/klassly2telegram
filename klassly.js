@@ -1,3 +1,5 @@
+import fs from 'fs/promises';
+import path from 'path';
 import got from 'got';
 import { CookieJar } from 'tough-cookie';
 import { FormData } from 'formdata-node';
@@ -28,7 +30,6 @@ export default function Klassly(config) {
   };
 
   const login = async () => {
-    console.log('Login...');
     await client.get('https://fr.klass.ly/').text();
 
     device = cookieJar
@@ -83,8 +84,6 @@ export default function Klassly(config) {
   };
 
   const getPost = async (klass) => {
-    console.log(`Get posts from '${klass.name}'...`);
-
     const body = new FormData();
     body.set('id', klass.id);
     body.set('filter', 'all');
@@ -92,6 +91,10 @@ export default function Klassly(config) {
     body.set('from', new Date().getTime());
     setCommon(body);
     const data = await client.post('https://api2.klassroom.co/klass.history', { body }).json();
+    if (config.debug.savePosts) {
+      const file = path.join(config.home, `posts-${klass.id}.json`);
+      await fs.writeFile(file, JSON.stringify(data, null, 2), 'utf-8');
+    }
 
     if (!data.ok) throw new Error('Unable to get posts');
 
@@ -109,12 +112,17 @@ export default function Klassly(config) {
           url: data.posts[id].attachments[a].url,
           name: data.posts[id].attachments[a].name,
         })),
+        poll: data.posts[id].poll
+          ? {
+              question: data.posts[id].poll.question,
+              options: data.posts[id].poll.options,
+            }
+          : undefined,
       }))
       .sort((a, b) => b.datems - a.datems);
   };
 
   const downloadAttachments = async (posts) => {
-    console.log('Download attachments...');
     for (const post of posts) {
       for (const attach of post.attachments) {
         let url = attach.url;
