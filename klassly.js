@@ -91,7 +91,7 @@ export default function Klassly(config) {
     body.set('from', new Date().getTime());
     setCommon(body);
     const data = await client.post('https://api2.klassroom.co/klass.history', { body }).json();
-    if (config.debug.savePosts) {
+    if (config.debug?.savePosts) {
       const file = path.join(config.home, `posts-${klass.id}.json`);
       await fs.writeFile(file, JSON.stringify(data, null, 2), 'utf-8');
     }
