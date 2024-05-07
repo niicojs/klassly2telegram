@@ -34,8 +34,10 @@ export default function Telegram(config) {
     retry: { limit: 0 },
   });
 
-  const escape = (text) =>
-    text.replace(/(\_|\*|\[|\]|\(|\)|\~|\`|\>|\#|\+|\-|\=|\||\{|\}|\.|\!)/g, '\\$1');
+  const escape = (text) => {
+    if (!text) return '\\.';
+    return text.replace(/(\_|\*|\[|\]|\(|\)|\~|\`|\>|\#|\+|\-|\=|\||\{|\}|\.|\!)/g, '\\$1');
+  };
 
   const sendAttachments = async (files, type) => {
     if (files.length === 1) {
