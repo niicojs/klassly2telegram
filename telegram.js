@@ -26,6 +26,9 @@ export default function Telegram(config) {
     }
     last = new Date().getTime();
   };
+  const wait = async (time) => {
+    return new Promise((resolve) => setTimeout(resolve, time));
+  };
 
   const client = got.extend({
     prefixUrl: `https://api.telegram.org/bot${token}`,
@@ -40,6 +43,7 @@ export default function Telegram(config) {
   };
 
   const sendAttachments = async (files, type) => {
+    console.log(`Send ${files.length} attachments...`);
     if (files.length === 1) {
       await throttle();
       const api = {
@@ -69,6 +73,9 @@ export default function Telegram(config) {
         }
         form.append('media', JSON.stringify(media));
         await client.post('sendMediaGroup', { body: form });
+        if (elts.length >= 10) {
+          await wait(1 * 60 * 1000); // wait a minute to avoid throttling
+        }
       }
     }
   };
