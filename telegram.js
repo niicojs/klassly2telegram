@@ -1,6 +1,6 @@
 import { Blob } from 'buffer';
 import { FormData } from 'formdata-node';
-import got from 'got';
+import ky from 'ky';
 import { format } from 'date-fns';
 
 function chunk(items, size) {
@@ -30,11 +30,20 @@ export default function Telegram(config) {
     return new Promise((resolve) => setTimeout(resolve, time));
   };
 
-  const client = got.extend({
+  const client = ky.create({
     prefixUrl: `https://api.telegram.org/bot${token}`,
-    resolveBodyOnly: true,
-    responseType: 'json',
-    retry: { limit: 0 },
+    retry: {
+      limit: 2,
+      methods: ['get', 'post'],
+      statusCodes: [429],
+      delay: (attemptCount) => {
+        if (attemptCount === 2) {
+          return 61_000;
+        } else {
+          return 2 ** (attemptCount - 1) * 1_000;
+        }
+      },
+    },
   });
 
   const escape = (text) => {
@@ -74,7 +83,7 @@ export default function Telegram(config) {
         form.append('media', JSON.stringify(media));
         await client.post('sendMediaGroup', { body: form });
         if (elts.length >= 10) {
-          await wait(1 * 60 * 1000); // wait a minute to avoid throttling
+          await wait(1 * 60 * 1_000 + 100); // wait a minute to avoid throttling
         }
       }
     }
