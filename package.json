@@ -10,14 +10,14 @@
   },
   "type": "module",
   "dependencies": {
-    "date-fns": "^3.6.0",
-    "dotenv": "^16.4.5",
+    "date-fns": "^4.1.0",
+    "dotenv": "^17.2.2",
     "formdata-node": "^6.0.3",
     "global-agent": "^3.0.0",
-    "got": "^14.4.2",
-    "ky": "^1.7.2",
+    "got": "^14.4.8",
+    "ky": "^1.10.0",
     "minimist": "^1.2.8",
     "toml": "^3.0.0",
-    "tough-cookie": "^4.1.4"
+    "tough-cookie": "^6.0.0"
   }
 }
