@@ -1,6 +1,5 @@
 import { Blob } from 'buffer';
-import { FormData } from 'formdata-node';
-import ky from 'ky';
+import { ofetch } from 'ofetch';
 import { format } from 'date-fns';
 
 function chunk(items, size) {
@@ -30,25 +29,25 @@ export default function Telegram(config) {
     return new Promise((resolve) => setTimeout(resolve, time));
   };
 
-  const client = ky.create({
-    prefixUrl: `https://api.telegram.org/bot${token}`,
-    retry: {
-      limit: 2,
-      methods: ['get', 'post'],
-      statusCodes: [429],
-      delay: (attemptCount) => {
-        if (attemptCount === 2) {
-          return 61_000;
-        } else {
-          return 2 ** (attemptCount - 1) * 1_000;
-        }
-      },
+  const client = ofetch.create({
+    method: 'POST',
+    baseURL: `https://api.telegram.org/bot${token}`,
+    retry: 5,
+    retryDelay: (ctx) => {
+      const opt = ctx.options;
+      const attempt = (opt.retryAttempt = (opt.retryAttempt || 0) + 1);
+      if (attempt < 2) {
+        return 2 ** (attempt - 1) * 1_000;
+      } else {
+        return 61_000;
+      }
     },
+    retryStatusCodes: [408, 429, 503, 504],
   });
 
   const escape = (text) => {
     if (!text) return '\\.';
-    return text.replace(/(\_|\*|\[|\]|\(|\)|\~|\`|\>|\#|\+|\-|\=|\||\{|\}|\.|\!)/g, '\\$1');
+    return text.replace(/(_|\*|\[|\]|\(|\)|~|`|>|#|\+|-|=|\||\{|\}|\.|!)/g, '\\$1');
   };
 
   const sendAttachments = async (files, type) => {
@@ -65,8 +64,8 @@ export default function Telegram(config) {
       const form = new FormData();
       form.append('chat_id', chatId);
       form.append('disable_notification', true);
-      form.append(type, new Blob([file.data]), file.name);
-      await client.post(api[type], { body: form });
+      form.append(type, new Blob([file.data.buffer]), file.name);
+      await client(api[type], { body: form });
     } else {
       for (const elts of chunk(files, 10)) {
         await throttle();
@@ -78,10 +77,10 @@ export default function Telegram(config) {
             type: type,
             media: `attach://${file.name}`,
           });
-          form.append(file.name, new Blob([file.data]), file.name);
+          form.append(type, new Blob([file.data.buffer]), file.name);
         }
         form.append('media', JSON.stringify(media));
-        await client.post('sendMediaGroup', { body: form });
+        await client('sendMediaGroup', { body: form });
         if (elts.length >= 10) {
           await wait(1 * 60 * 1_000 + 100); // wait a minute to avoid throttling
         }
@@ -96,8 +95,8 @@ export default function Telegram(config) {
 
     await throttle();
 
-    await client.post('sendMessage', {
-      json: {
+    await client('sendMessage', {
+      body: {
         chat_id: chatId,
         parse_mode: 'MarkdownV2',
         text: `
@@ -110,8 +109,8 @@ _${escape(post.text)}_`,
     });
 
     if (post.type === 'poll') {
-      await client.post('sendMessage', {
-        json: {
+      await client('sendMessage', {
+        body: {
           chat_id: chatId,
           parse_mode: 'MarkdownV2',
           text: `
@@ -144,8 +143,8 @@ _${escape(post.poll.question)}_`,
     const others = post.attachments.filter((a) => !['image', 'document', 'video'].includes(a.type));
     if (others.length > 0) {
       await throttle();
-      await client.post('sendMessage', {
-        json: {
+      await client('sendMessage', {
+        body: {
           chat_id: config.telegram.chatId,
           parse_mode: 'MarkdownV2',
           text: `${others.length} objet${others.length > 1 ? 's' : ''} de type ${others

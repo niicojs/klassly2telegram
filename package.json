@@ -11,12 +11,12 @@
   "type": "module",
   "dependencies": {
     "date-fns": "^4.1.0",
-    "dotenv": "^17.2.2",
+    "dotenv": "^17.2.3",
     "formdata-node": "^6.0.3",
     "global-agent": "^3.0.0",
-    "got": "^14.4.8",
-    "ky": "^1.10.0",
+    "got": "^14.6.5",
     "minimist": "^1.2.8",
+    "ofetch": "^1.5.1",
     "toml": "^3.0.0",
     "tough-cookie": "^6.0.0"
   }
