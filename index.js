@@ -68,6 +68,7 @@ try {
       history.push({ id: post.id, date: post.date });
     } catch (e) {
       console.log('Error');
+      if (e.data?.description) console.error(e.data.description);
       console.log(e.response?.body?.description || e.message);
       console.log(e);
     }

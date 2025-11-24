@@ -51,7 +51,7 @@ export default function Telegram(config) {
   };
 
   const sendAttachments = async (files, type) => {
-    console.log(`Send ${files.length} attachments...`);
+    console.log(`Send ${files.length} ${type} attachments...`);
     if (files.length === 1) {
       await throttle();
       const api = {
@@ -67,17 +67,20 @@ export default function Telegram(config) {
       form.append(type, new Blob([file.data.buffer]), file.name);
       await client(api[type], { body: form });
     } else {
+      let idx = 1;
       for (const elts of chunk(files, 10)) {
         await throttle();
         const form = new FormData();
         form.append('chat_id', chatId);
+        form.append('disable_notification', true);
         const media = [];
         for (const file of elts) {
+          const name = (idx++).toString().padStart(2, '0');
           media.push({
             type: type,
-            media: `attach://${file.name}`,
+            media: `attach://${name}`,
           });
-          form.append(type, new Blob([file.data.buffer]), file.name);
+          form.append(name, new Blob([file.data.buffer]), file.name);
         }
         form.append('media', JSON.stringify(media));
         await client('sendMediaGroup', { body: form });
@@ -123,21 +126,15 @@ _${escape(post.poll.question)}_`,
 
     // send photos
     const images = post.attachments.filter((a) => a.type === 'image');
-    if (images.length > 0) {
-      await sendAttachments(images, 'photo');
-    }
+    if (images.length > 0) await sendAttachments(images, 'photo');
 
     // document (pdf par exemple)
     const docs = post.attachments.filter((a) => a.type === 'document');
-    if (docs.length > 0) {
-      await sendAttachments(docs, 'document');
-    }
+    if (docs.length > 0) await sendAttachments(docs, 'document');
 
     // send videos
     const videos = post.attachments.filter((a) => a.type === 'video');
-    if (videos.length > 0) {
-      await sendAttachments(videos, 'video');
-    }
+    if (videos.length > 0) await sendAttachments(videos, 'video');
 
     // notif pour les autres objets (audio ?)
     const others = post.attachments.filter((a) => !['image', 'document', 'video'].includes(a.type));
